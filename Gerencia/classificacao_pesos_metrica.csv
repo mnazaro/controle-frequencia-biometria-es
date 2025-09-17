@@ -1,0 +1,7 @@
+caso_de_uso;entradas(peso);saidas(peso);consultas(peso);arquivos(peso);interfaces_ext(peso);total_PF
+Cadastrar usuário;Médio (4);Médio (5);Simples (3);Médio (10);Médio (7+7=14);36
+Abrir evento;Médio (4);Complexo (7);Simples (3);Médio (10+10=20);Simples (0);34
+Registrar presença;Simples (3);Complexo (7);Médio (4);Médio (10+10+10=30);Médio (7);51
+Gerar relatório;Médio (4);Complexo (7);Médio (4);Médio (10+10+10=30);Simples (0);55
+Consultar logs;Simples (3);Médio (5);Médio (4);Médio (10+10=20);Simples (0);32
+Sincronizar dados;Simples (3);Complexo (7);Médio (4);Médio (10+10=20);Médio (7);41

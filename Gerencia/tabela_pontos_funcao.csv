@@ -1,0 +1,7 @@
+entradas;saídas;consultas;arquivos;interfaces_ext
+Cadastrar usuário (dados básicos + CPF + senha + biometria);"Confirmação de cadastro / mensagens de erro";Consulta a dados do repositório institucional;Usuários;Repositório institucional, Leitor biométrico
+Abrir evento (tipo, data/hora, local, aprovação coordenador);"Confirmação da criação / mensagens de validação ou conflito";Verificação de conflito de data/hora/local;Eventos, Logs;-
+Registrar presença (opção registrar + biometria);"Confirmação de presença / mensagens de erro (sessão inativa, conflito, fora do horário)";Verificação de sessão ativa e janela do evento;Presenças, Eventos, Usuários;Leitor biométrico
+Gerar relatório (critério de consulta: evento, usuário, disciplina, data);"Relatório detalhado / opção de exportação / mensagens de erro";Consulta e organização dos dados de presença;Presenças, Eventos, Usuários;-
+Consultar logs (seleção de evento);"Lista de alterações / mensagens de acesso negado ou erro";Recuperação de registros de log;Logs, Eventos;-
+Sincronizar dados (detecção de conexão + envio para nuvem);"Confirmação de sincronização / mensagens de erro";Verificação de status dos registros e da conexão;Presenças, Eventos;Serviço de nuvem

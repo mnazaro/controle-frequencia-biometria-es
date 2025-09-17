@@ -5,6 +5,28 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 16-09-2025
+
+### Adicionado
+ - FFC-13 **MAJOR** Adicionado cáculo referente à métrica (Pontos por Função)
+
+### Alterado
+
+### Corrigido
+
+---
+
+## [0.5.0] - 08-09-2025
+
+### Adicionado
+ - FFC-10 **MAJOR** Adicionado Documento de Casos de Uso Expandido
+
+### Alterado
+
+### Corrigido
+
+---
+
 ## [0.4.0] - 25-08-2025
 
 ### Adicionado
