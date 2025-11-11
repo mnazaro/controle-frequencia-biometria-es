@@ -9,6 +9,10 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Adicionado
  - FFC-17 **MINOR** Adicionando Relatório de defeitos de Diagrama de casos de uso e Modelo conceitual
+## [0.10.0] - 23-10-2025
+
+### Adicionado
+ - FFC-18 **MINOR** Adicionando Diagrama de Caso de Uso
 
 ### Alterado
 
