@@ -5,6 +5,10 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 23-09-2025
+
+### Adicionado
+ - FFC-17 **MINOR** Adicionando Relatório de defeitos de Diagrama de casos de uso e Modelo conceitual
 ## [0.10.0] - 23-10-2025
 
 ### Adicionado
