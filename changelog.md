@@ -5,6 +5,11 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 12-11-2025
+
+### Corrigido 
+    -FFC-27 Adicionando correções no Modelo Conceitual
+
 ## [0.10.0] - 23-09-2025
 
 ### Adicionado
