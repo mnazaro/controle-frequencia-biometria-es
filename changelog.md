@@ -4,6 +4,11 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.14.0] - 18-11-2025
+
+### Adicionado
+- FFC-24 **MINOR** Adicionados Diagramas de Colaboração dos Casos de Uso 1 ao 4
+
 ## [0.13.0] - 18-11-2025
 
 ### Adicionado
