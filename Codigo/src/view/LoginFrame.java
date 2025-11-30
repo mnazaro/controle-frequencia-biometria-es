@@ -1,6 +1,9 @@
 package view;
 
+import controller.DataSeeder;
+import controller.LogController;
 import controller.SistemaController;
+import model.TipoUsuario;
 import model.Usuario;
 
 import javax.swing.*;
@@ -20,11 +23,11 @@ public class LoginFrame extends JFrame {
         controller.inicializar();
 
         setTitle("Login - Sistema de Controle de Frequência");
-        setSize(300, 200);
+        setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         panel.add(new JLabel("Email:"));
@@ -36,22 +39,27 @@ public class LoginFrame extends JFrame {
         panel.add(senhaField);
 
         loginButton = new JButton("Entrar");
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                autenticar();
-            }
-        });
+        loginButton.addActionListener(e -> autenticar());
         panel.add(loginButton);
 
         registrarButton = new JButton("Registar-se");
-        registrarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                abrirCadastro();
+        registrarButton.addActionListener(e -> abrirCadastro());
+        panel.add(registrarButton);
+
+        // Botão de reset para desenvolvimento
+        JButton resetButton = new JButton("Reset DB");
+        resetButton.setFont(new Font("Arial", Font.PLAIN, 10));
+        resetButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "Isso vai apagar todos os dados e gerar dados de demonstração. Continuar?", "Reset DB", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                DataSeeder.resetarDados();
+                DataSeeder.gerarCargaInicial();
+                JOptionPane.showMessageDialog(this, "Banco de dados resetado e semeado com dados de demonstração.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             }
         });
-        panel.add(registrarButton);
+        panel.add(resetButton);
+
+        panel.add(new JLabel()); // Espaço vazio
 
         add(panel);
     }
@@ -61,11 +69,19 @@ public class LoginFrame extends JFrame {
         String senha = new String(senhaField.getPassword());
         Usuario usuario = controller.autenticar(email, senha);
         if (usuario != null) {
-            // Abrir MainFrame
-            MainFrame mainFrame = new MainFrame();
-            mainFrame.setVisible(true);
-            dispose(); // Fechar login
+            if (usuario.getTipo() == TipoUsuario.ADMIN) {
+                LogController.getInstance().registrarLog(usuario.getNome(), "LOGIN_SUCESSO", "Login realizado com sucesso");
+                // Abrir MainFrame
+                MainFrame mainFrame = new MainFrame();
+                mainFrame.setVisible(true);
+                dispose(); // Fechar login
+            } else {
+                // Acesso negado para alunos
+                JOptionPane.showMessageDialog(this, "Acesso Negado: Esta aplicação é restrita a Administradores. Alunos devem utilizar apenas o registro biométrico nos totens.", "Acesso Negado", JOptionPane.WARNING_MESSAGE);
+                LogController.getInstance().registrarLog(usuario.getNome(), "TENTATIVA_ACESSO_RESTRITO", "Tentativa de acesso à aplicação administrativa por usuário do tipo ALUNO");
+            }
         } else {
+            LogController.getInstance().registrarLog(email, "LOGIN_FALHA", "Tentativa de login com email: " + email);
             JOptionPane.showMessageDialog(this, "Credenciais Inválidas", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }

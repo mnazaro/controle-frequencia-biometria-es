@@ -3,9 +3,21 @@ import view.LoginFrame;
 import view.SplashScreen;
 
 import javax.swing.*;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Main {
+    private static LoginFrame loginFrame; // Referência para manter viva
+
     public static void main(String[] args) {
+        // Global Exception Handler para capturar UncaughtExceptions
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            System.err.println("Uncaught Exception in thread " + t.getName() + ":");
+            e.printStackTrace(System.err);
+            JOptionPane.showMessageDialog(null, "Erro Crítico: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            System.exit(1); // Encerra a aplicação após mostrar o erro
+        });
+
         SwingUtilities.invokeLater(() -> {
             SplashScreen splash = new SplashScreen();
             splash.showSplash();
@@ -50,10 +62,17 @@ public class Main {
 
                 @Override
                 protected void done() {
-                    splash.hideSplash();
-                    // Abrir LoginFrame
-                    LoginFrame loginFrame = new LoginFrame();
-                    loginFrame.setVisible(true);
+                    try {
+                        get(); // Verificar se houve exceção no doInBackground
+                        splash.hideSplash();
+                        // Abrir LoginFrame
+                        loginFrame = new LoginFrame();
+                        loginFrame.setVisible(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Erro na inicialização: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                        System.exit(1);
+                    }
                 }
             };
 

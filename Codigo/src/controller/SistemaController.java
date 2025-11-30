@@ -6,6 +6,7 @@ import model.*;
 
 import java.io.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,42 +122,49 @@ public class SistemaController {
     }
 
     public void criarEvento(String titulo, LocalDateTime dataInicio, LocalDateTime dataFim, String local, StatusEvento status) throws Exception {
+        Evento evento = new Evento(titulo, dataInicio, dataFim, local, status);
+        criarEvento(evento, false);
+    }
+
+    public void criarEvento(Evento evento, boolean ignorarValidacaoData) throws Exception {
+        validarECriarEvento(evento, ignorarValidacaoData);
+    }
+
+    private void validarECriarEvento(Evento evento, boolean ignorarValidacaoData) throws Exception {
         // Validações de datas
-        if (dataInicio == null) {
+        if (evento.getDataInicio() == null) {
             throw new Exception("Data de início não pode ser nula.");
         }
-        if (dataFim.isBefore(dataInicio) || dataFim.isEqual(dataInicio)) {
+        if (evento.getDataFim().isBefore(evento.getDataInicio()) || evento.getDataFim().isEqual(evento.getDataInicio())) {
             throw new Exception("Data de fim deve ser posterior à data de início.");
         }
-        // Opcional: não no passado
-        if (dataInicio.isBefore(LocalDateTime.now())) {
+        // Opcional: não no passado, a menos que ignorado
+        if (!ignorarValidacaoData && evento.getDataInicio().isBefore(LocalDateTime.now())) {
             throw new Exception("Não é possível criar eventos no passado.");
         }
 
         // Validação de conflitos
         for (Evento existente : eventos) {
-            if (existente.getLocal().equals(local)) {
+            if (existente.getLocal().equals(evento.getLocal())) {
                 LocalDateTime existenteInicio = existente.getDataInicio();
                 LocalDateTime existenteFim = existente.getDataFim();
-                if (dataInicio.isBefore(existenteFim) && dataFim.isAfter(existenteInicio)) {
-                    throw new EventoConflitoException("Conflito de horário detectado para o local " + local + " no horário " + existenteInicio + " - " + existenteFim);
+                if (evento.getDataInicio().isBefore(existenteFim) && evento.getDataFim().isAfter(existenteInicio)) {
+                    LogController.getInstance().registrarLog("Sistema", "CONFLITO_AGENDA", "Conflito detectado para local " + evento.getLocal() + " com evento existente");
+                    throw new EventoConflitoException("Conflito de horário detectado para o local " + evento.getLocal() + " no horário " + existenteInicio + " - " + existenteFim);
                 }
             }
         }
 
-        Evento evento = new Evento(titulo, dataInicio, dataFim, local, status);
         eventos.add(evento);
         salvarTudo();
+        LogController.getInstance().registrarLog("Sistema", "CRIAR_EVENTO", "Evento criado: " + evento.getTitulo());
     }
 
-    public void registrarPresenca(Evento evento) throws Exception {
-        String codigo = leitorBiometrico.capturarDigital();
-        if (codigo == null || codigo.trim().isEmpty()) {
-            throw new Exception("Captura cancelada ou vazia.");
-        }
+    public String registrarPresenca(String codigoBiometrico, Evento eventoAtual) throws Exception {
+        // Busca usuário
         Usuario usuario = null;
         for (Usuario u : usuarios) {
-            if (u.getCodigoBiometrico().equals(codigo)) {
+            if (u.getCodigoBiometrico().equals(codigoBiometrico)) {
                 usuario = u;
                 break;
             }
@@ -164,13 +172,26 @@ public class SistemaController {
         if (usuario == null) {
             throw new Exception("Usuário não encontrado.");
         }
-        LocalDateTime agora = LocalDateTime.now();
-        if (agora.isBefore(evento.getDataInicio()) || agora.isAfter(evento.getDataFim())) {
-            throw new Exception("Fora do horário.");
+
+        // Verifica duplicidade
+        for (RegistroPresenca reg : registros) {
+            if (reg.getUsuario().equals(usuario) && reg.getEvento().equals(eventoAtual)) {
+                throw new Exception("Presença já registrada!");
+            }
         }
-        RegistroPresenca registro = new RegistroPresenca(usuario, evento, agora);
+
+        // Verifica janela de tempo
+        LocalDateTime agora = LocalDateTime.now();
+        if (agora.isBefore(eventoAtual.getDataInicio()) || agora.isAfter(eventoAtual.getDataFim())) {
+            throw new Exception("Evento não está ocorrendo agora.");
+        }
+
+        // Sucesso
+        RegistroPresenca registro = new RegistroPresenca(usuario, eventoAtual, agora);
         registros.add(registro);
         salvarTudo();
+
+        return usuario.getNome() + " - " + agora.format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
     public Usuario autenticar(String email, String senha) {
@@ -188,6 +209,10 @@ public class SistemaController {
 
     public List<Evento> getEventos() {
         return eventos;
+    }
+
+    public List<RegistroPresenca> getRegistros() {
+        return registros;
     }
 
     public ILeitorBiometrico getLeitorBiometrico() {

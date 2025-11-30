@@ -1,1 +1,0 @@
-> **Nota:** Este arquivo existe apenas como *placeholder* para manter a estrutura de pastas do projeto.

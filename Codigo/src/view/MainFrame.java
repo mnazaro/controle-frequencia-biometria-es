@@ -1,5 +1,6 @@
 package view;
 
+import controller.SincronizacaoController;
 import controller.SistemaController;
 import model.*;
 
@@ -17,12 +18,12 @@ public class MainFrame extends JFrame {
     private JTabbedPane tabbedPane;
     private JTable usuariosTable;
     private JTable eventosTable;
-    private JComboBox<Evento> eventoComboBox;
-    private JLabel statusLabel;
+    private SincronizacaoController syncController;
 
     public MainFrame() {
         controller = SistemaController.getInstance();
         controller.inicializar();
+        syncController = new SincronizacaoController();
 
         setTitle("Sistema de Controle de Frequência Biométrica");
         setSize(800, 600);
@@ -51,7 +52,27 @@ public class MainFrame extends JFrame {
         JPanel totemPanel = createTotemPanel();
         tabbedPane.addTab("Totem de Presença", totemPanel);
 
-        add(tabbedPane);
+        // Aba Relatórios
+        RelatorioPanel relatorioPanel = new RelatorioPanel();
+        tabbedPane.addTab("Relatórios", relatorioPanel);
+
+        // Toolbar superior
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
+
+        JButton syncButton = new JButton("Sincronizar com Nuvem");
+        syncButton.addActionListener(e -> sincronizarDados(syncButton));
+        atualizarBotaoSync(syncButton);
+        toolBar.add(syncButton);
+
+        // Aba Logs de Auditoria
+        LogsPanel logsPanel = new LogsPanel();
+        tabbedPane.addTab("Logs de Auditoria", logsPanel);
+
+        // Layout principal
+        setLayout(new BorderLayout());
+        add(toolBar, BorderLayout.NORTH);
+        add(tabbedPane, BorderLayout.CENTER);
     }
 
     private JPanel createUsuariosPanel() {
@@ -143,59 +164,40 @@ public class MainFrame extends JFrame {
         EventoFrame eventoFrame = new EventoFrame(this);
         eventoFrame.setVisible(true);
         atualizarEventosTable();
-        atualizarEventoComboBox();
     }
 
     private JPanel createTotemPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        // ComboBox para eventos
-        eventoComboBox = new JComboBox<>();
-        atualizarEventoComboBox();
-        panel.add(eventoComboBox, BorderLayout.NORTH);
-
-        // Botão gigante
-        JButton registrarButton = new JButton("REGISTRAR PRESENÇA");
-        registrarButton.setFont(new Font("Arial", Font.BOLD, 24));
-        registrarButton.addActionListener(new ActionListener() {
+        JButton abrirTotemButton = new JButton("ABRIR TOTEM DE PRESENÇA");
+        abrirTotemButton.setFont(new Font("Arial", Font.BOLD, 20));
+        abrirTotemButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                registrarPresenca();
+                TotemFrame totem = new TotemFrame();
+                totem.setVisible(true);
             }
         });
-        panel.add(registrarButton, BorderLayout.CENTER);
-
-        // Label para status
-        statusLabel = new JLabel("Pronto", SwingConstants.CENTER);
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        panel.add(statusLabel, BorderLayout.SOUTH);
+        panel.add(abrirTotemButton, BorderLayout.CENTER);
 
         return panel;
     }
 
-    private void atualizarEventoComboBox() {
-        eventoComboBox.removeAllItems();
-        for (Evento ev : controller.getEventos()) {
-            if (ev.getStatus() == StatusEvento.ABERTO) {
-                eventoComboBox.addItem(ev);
-            }
-        }
+    private void sincronizarDados(JButton button) {
+        button.setEnabled(false);
+        button.setText("Enviando...");
+        syncController.sincronizarPendentes(() -> {
+            atualizarBotaoSync(button);
+        });
     }
 
-    private void registrarPresenca() {
-        Evento evento = (Evento) eventoComboBox.getSelectedItem();
-        if (evento == null) {
-            statusLabel.setText("Nenhum evento selecionado");
-            statusLabel.setForeground(Color.RED);
-            return;
+    private void atualizarBotaoSync(JButton button) {
+        int pendentes = syncController.getPendentesCount();
+        if (pendentes > 0) {
+            button.setText("Sincronizar com Nuvem (" + pendentes + " pendentes)");
+        } else {
+            button.setText("Sincronizar com Nuvem");
         }
-        try {
-            controller.registrarPresenca(evento);
-            statusLabel.setText("Presença registrada com sucesso!");
-            statusLabel.setForeground(Color.GREEN);
-        } catch (Exception ex) {
-            statusLabel.setText("Erro: " + ex.getMessage());
-            statusLabel.setForeground(Color.RED);
-        }
+        button.setEnabled(true);
     }
 }
